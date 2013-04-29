@@ -8,3 +8,5 @@ xtend-gen/
 *.jar
 *.war
 *.ear
+!src-gen/.gitignore
+!xtend-gen/.gitignore

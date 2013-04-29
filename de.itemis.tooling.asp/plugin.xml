@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<plugin>
+
+  <extension point="org.eclipse.emf.ecore.generated_package">
+    <package 
+       uri = "http://www.itemis.de/tooling/asp/ASP" 
+       class = "de.itemis.tooling.asp.aSP.ASPPackage"
+       genModel = "de/itemis/tooling/asp/ASP.genmodel" /> 
+	
+  </extension>
+
+
+
+
+</plugin>
