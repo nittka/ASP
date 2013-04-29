@@ -34,8 +34,10 @@ class AspDerivedStateComputer implements IDerivedStateComputer {
 
 	//TODO optimize
 	override installDerivedState(DerivedStateAwareResource resource, boolean preLinkingPhase) {
-		resource.contents.get(0).eContents.forEach[addVariables]
-		resource.contents.get(0).eAllContents.forEach[addPredicates(resource)]
+		if(resource.contents.size>0){
+			resource.contents.get(0).eContents.forEach[addVariables]
+			resource.contents.get(0).eAllContents.forEach[addPredicates(resource)]
+		}
 	}
 
 	def dispatch void addPredicates(EObject o, DerivedStateAwareResource resource) { }

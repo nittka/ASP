@@ -12,7 +12,7 @@ Statement returns VariableContainer:
 
 Fact: head=PredicateRef;
 
-Rule: head=PredicateRef ":-" body=Body;
+Rule: head=PredicateRef ":-" (body=Body)?;
 
 PredicateRef: predicate=[Predicate|ID] ('('terms+=Term (','terms+=Term)*')')?;
 

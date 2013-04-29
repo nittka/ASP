@@ -25,8 +25,8 @@ public class AspRuntimeModule extends de.itemis.tooling.asp.AbstractAspRuntimeMo
 		return AspDerivedStateComputer.class;
 	}
 
-
-	public Class<? extends ILocationInFileProvider> bindLocationProvider() {
+	@Override
+	public Class<? extends ILocationInFileProvider> bindILocationInFileProvider() {
 		return AspLocationInFileProvider.class;
 	}
 
