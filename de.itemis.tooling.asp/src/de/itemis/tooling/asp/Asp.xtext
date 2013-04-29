@@ -1,0 +1,35 @@
+grammar de.itemis.tooling.asp.Asp with org.eclipse.xtext.common.Terminals
+
+generate asp "http://www.itemis.de/tooling/asp/Asp"
+
+Program:
+	statements+=Statement*
+;
+
+Statement returns VariableContainer:
+	(Fact|Rule)'.'
+;
+
+Fact: head=PredicateRef;
+
+Rule: head=PredicateRef ":-" body=Body;
+
+PredicateRef: predicate=[Predicate|ID] ('('terms+=Term (','terms+=Term)*')')?;
+
+Body:terms+=PredicateRef (','terms+=PredicateRef)*;
+
+VariableContainer:variables+=Variable;
+Predicate:name=ID arity=INT;
+Variable:name=UCID;
+
+Term:StringLiteral|IntLiteral|//Constant|
+	VariableRef
+;
+
+StringLiteral:value=STRING;
+IntLiteral:value=INT;
+//Constant:value=[ConstantName|ID];
+VariableRef:value=[Variable|UCID];
+
+terminal ID: ('a'..'z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+terminal UCID: ('A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
