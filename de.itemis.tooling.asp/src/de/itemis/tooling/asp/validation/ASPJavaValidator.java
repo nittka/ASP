@@ -1,6 +1,9 @@
 package de.itemis.tooling.asp.validation;
+
+import org.eclipse.xtext.validation.ComposedChecks;
  
 
+@ComposedChecks(validators={ClassicalLiteralValidator.class})
 public class ASPJavaValidator extends AbstractASPJavaValidator {
 
 //	@Check
