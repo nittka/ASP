@@ -16,9 +16,9 @@ Program: statements+=Statement*;
 Statement:((Rule | Optimize)=>'.')| WRule;
 
 //Rule covers first two statement lines
-Rule: (head=Head (':-' (body=Body)?)?)
+Rule: (head=Head (Cons (body=Body)?)?)
 		| 
-	({Rule}':-' (body=Body)?)
+	({Rule}Cons (body=Body)?)
 ;
 //WRule covers Line 3
 WRule: ':~' body=Body? '.' '[' weight=Weight']';
@@ -62,7 +62,7 @@ Head:
 			'}' (rightBinop=Binop rightTerm=Term)?
 		)
 		|
-		({Disjunction.literal+=current}(=>'|' literal+=ClassicalLiteral)*)
+		({Disjunction.literals+=current}(=>'|' literals+=ClassicalLiteral)*)
 	)
 	
 //	Disjunction | Choice
@@ -85,11 +85,10 @@ AggregateElement:
 	(':' {AggregateElement} (literals+=NafLiteral (=>',' literals+=NafLiteral)*)?)
 ;
 
-//TODO validation, code completion; count, sum, min, max
-AggregateFunction hidden():'#'ID;
+AggregateFunction:('#min'|'#count'|'#max'|'#sum');
 
 //TODO inline function->OptimizeMax: ('maximize'|'maximise')...?
-Optimize: function=OptimizeFunction '{'(elements+=OptimizeElement (';' elements+=OptimizeElement))? '}';
+Optimize: function=OptimizeFunction '{'(elements+=OptimizeElement (';' elements+=OptimizeElement)*)? '}';
 OptimizeElement: weight=Weight (':' (literals+=NafLiteral (',' literals+=NafLiteral)*)?)?;
 
 enum OptimizeFunction:max="#maximize"|max="#maximise"|min='#minimise'|min='#minimize';
@@ -105,8 +104,9 @@ PosNafElement:Term ({CompareStart.left=current} op=Binop {BuiltinAtom.leftAndOp=
 //check function or negated function
 ClassicalLiteral: Term;
 
-
-enum Binop:equal='=='|unequal='<>'|unequal='!='|less='<'|greater='>'|lesseq='<='|greatereq='>=';
+//TODO maybe not as enum because of problems when missing
+//enums will then always have the default value
+enum Binop: equal='=='|unequal='<>'|unequal='!='|less='<'|greater='>'|lesseq='<='|greatereq='>=';
 
 Term: AdditionTerm;
 
@@ -137,6 +137,8 @@ StringTerm:value=STRING;
 Variable:value=UCID;
 AnonymousVariable:{AnonymousVariable}'_';
 ParenthesisTerm returns Term:'('Term')';
+
+Cons hidden():':''-';
 
 Function:name=ID ('('(terms+=Term (','terms+=Term)*)?')')?;
 
