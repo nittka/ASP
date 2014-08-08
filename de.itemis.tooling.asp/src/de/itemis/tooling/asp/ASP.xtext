@@ -13,20 +13,24 @@ generate aSP "http://www.itemis.de/tooling/asp/ASP"
 //the rest has to be enforced via validation
 Program: statements+=Statement*;
 
-Statement:((Rule | Optimize)=>'.')| WRule;
+Statement:Rule | Optimize| WRule;
 
 //Rule covers first two statement lines
-Rule: (head=Head (Cons (body=Body)?)?)
-		| 
-	({Rule}Cons (body=Body)?)
+Rule:{Rule}(
+		(head=Head (Cons (body=Body)?)?)
+			| 
+		(Cons (body=Body)?)
+	) '.'
 ;
+
+
 //WRule covers Line 3
 WRule: ':~' body=Body? '.' '[' weight=Weight']';
 
 
 Body: elements+=BodyElement (=>',' elements+=BodyElement)*;
 //TODO validation that only allowed elements are default-negated
-BodyElement: (defaultNegated='not')? positive=PosBodyElement;
+BodyElement: (defaultNegated?='not')? positive=PosBodyElement;
 
 //TODO check Term structure of PosBodyElement (Function or negated Function)
 PosBodyElement:
@@ -55,6 +59,7 @@ Head:
 		'}' (rightBinop=Binop rightTerm=Term)?
 	)
 	|
+	//classical literal
 	Term
 	(
 		({Choice.leftTerm=current}leftBinop=Binop
@@ -62,7 +67,7 @@ Head:
 			'}' (rightBinop=Binop rightTerm=Term)?
 		)
 		|
-		({Disjunction.literals+=current}(=>'|' literals+=ClassicalLiteral)*)
+		({Disjunction.literals+=current}(=>'|' literals+=Term/*ClassicalLiteral*/)*)
 	)
 	
 //	Disjunction | Choice
@@ -73,7 +78,8 @@ Head:
 //Choice: (leftTerm=Term leftBinop=Binop )?
 //	'{' elements+=ChoiceElement (=>';' elements+=ChoiceElement)'}' (rightBinop=Binop rightTerm=Term)?;
 
-ChoiceElement: head=ClassicalLiteral (':' bodyElement+=NafLiteral (=>',' bodyElement+=NafLiteral)*)?;
+//TODO check head for struture
+ChoiceElement: head=Term/*ClassicalLiteral*/ (':' bodyElement+=NafLiteral (=>',' bodyElement+=NafLiteral)*)?;
 
 
 //CompareStart:left=Term op=Binop;
@@ -88,7 +94,7 @@ AggregateElement:
 AggregateFunction:('#min'|'#count'|'#max'|'#sum');
 
 //TODO inline function->OptimizeMax: ('maximize'|'maximise')...?
-Optimize: function=OptimizeFunction '{'(elements+=OptimizeElement (';' elements+=OptimizeElement)*)? '}';
+Optimize: function=OptimizeFunction '{'(elements+=OptimizeElement (';' elements+=OptimizeElement))? '}''.';
 OptimizeElement: weight=Weight (':' (literals+=NafLiteral (',' literals+=NafLiteral)*)?)?;
 
 enum OptimizeFunction:max="#maximize"|max="#maximise"|min='#minimise'|min='#minimize';
@@ -96,13 +102,14 @@ enum OptimizeFunction:max="#maximize"|max="#maximise"|min='#minimise'|min='#mini
 Weight: term=Term ('@'atTerm=Term)? (',' commaTerms+=Term)*;
 
 //TODO check Builtin not default negated
-NafLiteral:(defaultNegated='not')? positive=PosNafElement;
+NafLiteral:(defaultNegated?='not')? positive=PosNafElement;
 
 //TODO check Term structure only function or negated function
 PosNafElement:Term ({CompareStart.left=current} op=Binop {BuiltinAtom.leftAndOp=current} right=Term)?;
 
 //check function or negated function
-ClassicalLiteral: Term;
+//TODO remove: we cannot check "instanceOf ClassicalTerm" anyway
+//ClassicalLiteral returns ClassicalLiteral: Term;
 
 //TODO maybe not as enum because of problems when missing
 //enums will then always have the default value
@@ -119,7 +126,7 @@ MultiplicationTerm returns Term:
 ;
 
 UnaryTerm returns Term:
-	('-'{NegatedTerm}negated=PrimaryTerm)
+	('-'{NegatedTerm} negated=PrimaryTerm)
 	|PrimaryTerm
 ;
 
@@ -136,6 +143,7 @@ Number:value=INT;
 StringTerm:value=STRING;
 Variable:value=UCID;
 AnonymousVariable:{AnonymousVariable}'_';
+//TODO check
 ParenthesisTerm returns Term:'('Term')';
 
 Cons hidden():':''-';
@@ -146,4 +154,4 @@ terminal ID: ('a'..'z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 terminal UCID: ('A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 
 terminal ML_COMMENT	: '%*' -> '*%';
-terminal SL_COMMENT 	: '%' !('\n'|'\r')* ('\r'? '\n')?;
+terminal SL_COMMENT : '%' !('\n'|'\r')* ('\r'? '\n')?;

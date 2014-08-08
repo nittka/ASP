@@ -30,5 +30,6 @@ Export-Package: de.itemis.tooling.asp,
  de.itemis.tooling.asp.parser.antlr.internal,
  de.itemis.tooling.asp.validation,
  de.itemis.tooling.asp.scoping,
+ de.itemis.tooling.asp.service,
  de.itemis.tooling.asp.generator,
  de.itemis.tooling.asp.formatting
